@@ -42,8 +42,6 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
-<<<<<<< HEAD
-
 ### [1.0.4] - 2017-01-31
 #### Added
 - Vignette correction
@@ -60,9 +58,6 @@ All notable changes to this project will be documented in this file.
 - Normalization of RGB images in the Preprocess step.
 
 ### [1.0.2] - 2016-12-15
-=======
-### [1.0.2] - 2016-12-13
->>>>>>> parent of 9732d97... Added Normalization
 #### ADDED
 - Transfer of GeoTIFF metadata.
 
@@ -104,3 +99,5 @@ All notable changes to this project will be documented in this file.
 ### [0.0.1] - 2016-12-1
 #### FIXED
 - Issue with merging channels in DJIx3 images
+
+

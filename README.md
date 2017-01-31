@@ -12,8 +12,6 @@ Functionality for above supported cameras includes:
 - Converts TIFF to JPG after calibration if desired
 
 Functionality still in the works:
-- Correcting vignette
-- Normalizing color (RGB) photos
 - Creating index images
 
 ### Installation
@@ -44,7 +42,26 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
+<<<<<<< HEAD
 ### [1.0.2] - 2016-12-13
+=======
+### [1.0.4] - 2017-01-31
+#### Added
+- Vignette correction
+- Kernel tab placeholder (Not yet functional)
+
+#### CHANGED
+- Removed options to remove vignette and normalize RGB images from the PreProcess tab (both will now be done automatically)
+
+#### TO DO
+- Fix issues with installing needed libraries for MacOS
+
+### [1.0.3] - 2016-12-19
+#### Added
+- Normalization of RGB images in the Preprocess step.
+
+### [1.0.2] - 2016-12-15
+>>>>>>> 57f6879e236a4a5cdc70c2649f8acf53399b7661
 #### ADDED
 - Transfer of GeoTIFF metadata.
 
@@ -86,3 +103,5 @@ All notable changes to this project will be documented in this file.
 ### [0.0.1] - 2016-12-1
 #### FIXED
 - Issue with merging channels in DJIx3 images
+
+

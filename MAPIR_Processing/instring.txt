@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 D:\DJI\New folder (2)
+=======
+D:\rgb_test-20161219T190325Z\Geo
+>>>>>>> 57f6879e236a4a5cdc70c2649f8acf53399b7661

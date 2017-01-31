@@ -12,8 +12,6 @@ Functionality for above supported cameras includes:
 - Converts TIFF to JPG after calibration if desired
 
 Functionality still in the works:
-- Correcting vignette
-- Normalizing color (RGB) photos
 - Creating index images
 
 ### Installation
@@ -44,11 +42,27 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
-### [1.0.2] - 2016-12-19
+<<<<<<< HEAD
+
+### [1.0.4] - 2017-01-31
+#### Added
+- Vignette correction
+- Kernel tab placeholder (Not yet functional)
+
+#### CHANGED
+- Removed options to remove vignette and normalize RGB images from the PreProcess tab (both will now be done automatically)
+
+#### TO DO
+- Fix issues with installing needed libraries for MacOS
+
+### [1.0.3] - 2016-12-19
 #### Added
 - Normalization of RGB images in the Preprocess step.
 
 ### [1.0.2] - 2016-12-15
+=======
+### [1.0.2] - 2016-12-13
+>>>>>>> parent of 9732d97... Added Normalization
 #### ADDED
 - Transfer of GeoTIFF metadata.
 
@@ -58,7 +72,7 @@ All notable changes to this project will be documented in this file.
 #### FIXED
 - Plugin no longer loads non image files with "tif" or "jpg" in the filepath.
 
-### [1.0.1] - 2016-12-14
+### [1.0.1] - 2016-12-13
 #### ADDED
 - Legacy support for Survey1 camera models in Calibrate tab.
 

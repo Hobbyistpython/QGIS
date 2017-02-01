@@ -25,13 +25,18 @@ import os
 os.umask(0)
 import sys
 import shutil
+from zipfile import ZipFile
 from PyQt4 import uic, QtGui
+from PyQt4.Qt import *
 from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtGui import *
 # from qgis.core import QgsMessageLog
 
 from scipy import stats
 import numpy as np
 import subprocess
+import hid
+
 modpath = os.path.dirname(os.path.realpath(__file__))
 
 if sys.platform == "win32": #Windows OS
@@ -54,12 +59,19 @@ if sys.platform == "win32": #Windows OS
 elif sys.platform == "darwin":
       if not os.path.exists(r'/usr/local/bin/brew'):
             subprocess.call([r'/usr/bin/ruby', r'-e', r'"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'])
+            subprocess.call([r'/usr/local/bin/brew',r'tap',r'homebrew/science'])
       if not os.path.exists(r'/usr/local/bin/dcraw'):
             subprocess.call([r'/usr/local/bin/brew',r'install',r'dcraw'])
+
       if not os.path.exists(r'/usr/local/bin/exiftool'):
             subprocess.call([r'/usr/local/bin/brew',r'install',r'exiftool'])
+
       if not os.path.exists(r'/usr/local/bin/opencv'):
             subprocess.call([r'/usr/local/bin/brew',r'install',r'opencv'])
+      sys.path.append(r'/usr/local/bin')
+      sys.path.append(r'/usr/local/bin/dcraw')
+      sys.path.append(r'/usr/local/bin/exiftool')
+      sys.path.append(r'/usr/local/bin/opencv')
       
 from osgeo import gdal
 import cv2
@@ -68,8 +80,11 @@ import glob
 if os.name == "nt":
       import exiftool
       exiftool.executable = modpath + os.sep + "exiftool.exe"
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'MAPIR_Processing_dockwidget_base.ui'))
+MODAL_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'MAPIR_Processing_dockwidget_modal.ui'))
 
 
 class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
@@ -91,13 +106,12 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
     BASE_COEFF_DJIPHANTOM3_NDVI_JPG = [-1.54494979, 3.44708472, 0.0, 0.0, -1.40606832, 6.35407929]
     BASE_COEFF_DJIPHANTOM3_NDVI_TIF = [-1.37495554, 0.01752340, 0.0, 0.0, -1.41073753, 0.03700812]
 
-
-
+    capturing = False
     SQ_TO_TARG = 2.1875
     SQ_TO_SQ = 5.0
     TARGET_LENGTH = 2.0
     TARG_TO_TARG = 2.6
-
+    dialog = None
     imcols = 4608
     imrows = 3456
     imsize = imcols * imrows
@@ -115,8 +129,9 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         "450":[[0, 0, 0],[0, 0, 0],[86.469794, 50.392915, 23.565447]]
     }
 
-    # with open("./values.csv") as values:
-    #     refvalues = csv.reader(values)
+    pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                     "greenmax": 0.0, "greenmin": 65535.0,
+                     "bluemax": 0.0, "bluemin": 65535.0}
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -128,7 +143,9 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-#Pre-Process Steps: Start
+
+   
+    #########Pre-Process Steps: Start#################
     def on_PreProcessInButton_released(self):
         with open(modpath + os.sep + "instring.txt", "r+") as instring:
             self.PreProcessInFolder.setText(QtGui.QFileDialog.getExistingDirectory(directory=instring.read()))
@@ -145,55 +162,114 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if self.PreProcessCameraModel.currentIndex() == -1:
             self.PreProcessLog.append("Attention! Please select a camera model.\n")
         else:
+            pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                             "greenmax": 0.0, "greenmin": 65535.0,
+                             "bluemax": 0.0, "bluemin": 65535.0}
+
+                # self.PreProcessLog.append(r'Extracting vignette corection data')
+            if not os.path.exists(modpath + os.sep + r'Vig'):
+                os.mkdir(modpath + os.sep + r'Vig')
+            vigfolder = modpath + os.sep + r'Vig'
+            with ZipFile(modpath + os.sep + r'Vig.zip') as vigzip:
+                vigzip.extractall(vigfolder)
+            DCfolder = vigfolder + os.sep + r'DC'
+            FFfolder = vigfolder + os.sep + r'FF'
+            if not os.path.exists(DCfolder + os.sep + r'Proc'):
+                os.mkdir(DCfolder + os.sep + r'Proc')
+            if not os.path.exists(FFfolder + os.sep + r'Proc'):
+                os.mkdir(FFfolder + os.sep + r'Proc')
+
+            if self.PreProcessCameraModel.currentIndex() == 0:
+                self.preProcessHelper(DCfolder + os.sep + r'ndvi', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'ndvi', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 1:
+                self.preProcessHelper(DCfolder + os.sep + r'rgb', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'rgb', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 2:
+                self.preProcessHelper(DCfolder + os.sep + r'nir', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'nir', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 3:
+                self.preProcessHelper(DCfolder + os.sep + r'red', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'red', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 4:
+                self.preProcessHelper(DCfolder + os.sep + r'green', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'green', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 5:
+                self.preProcessHelper(DCfolder + os.sep + r'blue', DCfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+                pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                                 "greenmax": 0.0, "greenmin": 65535.0,
+                                 "bluemax": 0.0, "bluemin": 65535.0}
+
+                self.preProcessHelper(FFfolder + os.sep + r'blue', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 7:
+                # self.preProcessHelper(DCfolder + r'FC350', DCfolder + os.sep + 'Proc', pixel_min_max,
+                #                       customerdata=False)
+                self.preProcessHelper(FFfolder + os.sep + r'FC350', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 8:
+                # self.preProcessHelper(DCfolder + r'FC330', DCfolder + os.sep + 'Proc', pixel_min_max,
+                #                       customerdata=False)
+                self.preProcessHelper(FFfolder + os.sep + r'FC330', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 9:
+                # self.preProcessHelper(DCfolder + r'FC300X', DCfolder + os.sep + 'Proc', pixel_min_max,
+                #                       customerdata=False)
+                self.preProcessHelper(FFfolder + os.sep + r'FC300X', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            elif self.PreProcessCameraModel.currentIndex() == 10:
+                # self.preProcessHelper(DCfolder + r'FC300S', DCfolder + os.sep + 'Proc', pixel_min_max,
+                #                       customerdata=False)
+                self.preProcessHelper(FFfolder + os.sep + r'FC300S', FFfolder + os.sep + r'Proc', pixel_min_max,
+                                      customerdata=False)
+            else:
+                self.PreProcessLog.append(r'Vignette correction not yet available for selected camera model.')
+
+            pixel_min_max = {"redmax": 0.0, "redmin": 65535.0,
+                             "greenmax": 0.0, "greenmin": 65535.0,
+                             "bluemax": 0.0, "bluemin": 65535.0}
+
             infolder = self.PreProcessInFolder.text()
             outfolder = self.PreProcessOutFolder.text()
+
             self.PreProcessLog.append("Input folder: " + infolder)
             self.PreProcessLog.append("Output folder: " + outfolder)
-            infiles = []
-            if "DJI" in self.PreProcessCameraModel.currentText():
-                os.chdir(infolder)
-                infiles.extend(glob.glob("." + os.sep + "*.[dD][nN][gG]"))
-                counter = 0
-                for input in infiles:
-                    self.PreProcessLog.append(
-                        "processing image: " + str((counter) + 1) + " of " + str(len(infiles)) +
-                        " " + input.split(os.sep)[1])
-                    self.openDNG(infolder + input.split('.')[1] + "." + input.split('.')[2], outfolder)
+            self.preProcessHelper(infolder, outfolder, pixel_min_max)
+            self.PreProcessLog.append("Finished Processing Images.")
+            if os.path.exists(modpath + os.sep + 'Vig'):
+                shutil.rmtree(modpath + os.sep + 'Vig')
 
-                    counter += 1
-            else:
-                os.chdir(infolder)
-                infiles.extend(glob.glob("." + os.sep + "*.[rR][aA][wW]*"))
-                infiles.extend(glob.glob("." + os.sep + "*.[jJ][pP][gG]*"))
-                infiles.sort()
-
-                if ("RAW" in infiles[0].upper()) and ("JPG" in infiles[1].upper()):
-                     counter = 0
-                     for input in infiles[::2]:
-                         self.PreProcessLog.append("processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
-                                                  " " + input.split(os.sep)[1])
-                         with open(input, "rb") as rawimage:
-                             img = np.fromfile(rawimage, np.dtype('u2'), self.imsize).reshape((self.imrows,self.imcols))
-                             color = cv2.cvtColor(img,cv2.COLOR_BAYER_RG2RGB)
-                             if self.RgbBox.isChecked():
-                                if self.PreProcessCameraModel.currentIndex() == 1:
-                                    cv2.merge((color[:, :, 0] * 2, color[:, :, 1], color[:, :, 2] * 2), color)
-                                    cv2.norm(color,cv2.NORM_MINMAX)
-                                else:
-                                    self.PreProcessLog.append("Normalization for RGB camera models only")
-
-
-                             filename = input.split('.')
-                             outputfilename = filename[1] + '.tif'
-
-                             cv2.imwrite(outfolder + outputfilename, color)
-                             
-                             self.copyExif(infiles[counter + 1], outfolder + outputfilename)
-                         counter += 2
-
-                else:
-                    self.PreProcessLog.append("Incorrect file structure. Please arrange files in a RAW, JPG, RAW, JGP... format.")
-            self.PreProcessLog.append("Finished Processing Images.")            
 # Pre-Process Steps: End
 
 # Calibration Steps: Start
@@ -528,14 +604,25 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.CalibrationLog.append("Making JPG")
             cv2.imencode(".jpg", refimg)
             cv2.imwrite(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", refimg, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+            cv2.imwrite(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", refimg)
+            srin = gdal.Open(photo)
+            inproj = srin.GetProjection()
+            transform = srin.GetGeoTransform()
+            gcpcount = srin.GetGCPs()
+            srout = gdal.Open(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", gdal.GA_Update)
+            srout.SetProjection(inproj)
+            srout.SetGeoTransform(transform)
+            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
             self.copyExif(photo, output_directory + photo.split('.')[1] + "_CALIBRATED.JPG")
             # if self.IndexBox.checkState() > 0:
             #     indeximg = (blue - red) / (blue + red)
             #     indeximg = indeximg.astype("float32")
             #     cv2.imwrite(output_directory + photo.split('.')[1] + "_Indexed.JPG", indeximg, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             #     self.copyExif(photo, output_directory + photo.split('.')[1] + "_Indexed.JPG")
+            #todo See if JPG can store geotiff metadata
         else:
             newimg = output_directory + photo.split('.')[1] + "_CALIBRATED." + photo.split('.')[2]
+            cv2.imencode(".tiff", refimg)
             cv2.imwrite(newimg, refimg)
             srin = gdal.Open(photo)
             inproj = srin.GetProjection()
@@ -747,6 +834,172 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
 
 # Helper functions
+    def preProcessHelper(self, infolder, outfolder, pixel_min_max, customerdata=True):
+
+        if "DJI" in self.PreProcessCameraModel.currentText():
+            os.chdir(infolder)
+            infiles = []
+            infiles.extend(glob.glob("." + os.sep + "*.[dD][nN][gG]"))
+            counter = 0
+            for input in infiles:
+                self.PreProcessLog.append(
+                    "processing image: " + str((counter) + 1) + " of " + str(len(infiles)) +
+                    " " + input.split(os.sep)[1])
+                self.openDNG(infolder + input.split('.')[1] + "." + input.split('.')[2], outfolder, customerdata)
+
+                counter += 1
+        else:
+            os.chdir(infolder)
+            infiles = []
+            infiles.extend(glob.glob("." + os.sep + "*.[rR][aA][wW]"))
+            infiles.extend(glob.glob("." + os.sep + "*.[jJ][pP][gG]"))
+            infiles.extend(glob.glob("." + os.sep + "*.[jJ][pP][eE][gG]"))
+            infiles.sort()
+
+            if ("RAW" in infiles[0].upper()) and ("JPG" in infiles[1].upper()):
+                counter = 0
+                for input in infiles[::2]:
+                    self.PreProcessLog.append(
+                        "processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
+                        " " + input.split(os.sep)[1])
+                    with open(input, "rb") as rawimage:
+                        img = np.fromfile(rawimage, np.dtype('u2'), self.imsize).reshape((self.imrows, self.imcols))
+                        color = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2RGB)
+
+                        filename = input.split('.')
+                        outputfilename = filename[1] + '.tiff'
+                        cv2.imencode(".tiff", color)
+                        cv2.imwrite(outfolder + outputfilename, color)
+                        if self.PreProcessCameraModel.currentIndex() == 1 and customerdata:
+                            # if self.PreProcessCameraModel.currentIndex() == 1:
+                                rgb = cv2.imread(outfolder + outputfilename, -1)
+
+
+                                pixel_min_max["redmax"] = max(np.percentile(rgb[:, :, 2], 80), pixel_min_max["redmax"])
+                                pixel_min_max["redmin"] = min(rgb[:, :, 2].min(), pixel_min_max["redmin"])
+                                pixel_min_max["greenmax"] = max(np.percentile(rgb[:, :, 1], 80),
+                                                                pixel_min_max["greenmax"])
+                                pixel_min_max["greenmin"] = min(rgb[:, :, 1].min(), pixel_min_max["greenmin"])
+                                pixel_min_max["bluemax"] = max(np.percentile(rgb[:, :, 0], 80),
+                                                               pixel_min_max["bluemax"])
+                                pixel_min_max["bluemin"] = min(rgb[:, :, 0].min(), pixel_min_max["bluemin"])
+
+
+                        if customerdata == True:
+                            srin = gdal.Open(infiles[counter + 1])
+                            inproj = srin.GetProjection()
+                            transform = srin.GetGeoTransform()
+                            gcpcount = srin.GetGCPs()
+                            srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
+                            srout.SetProjection(inproj)
+                            srout.SetGeoTransform(transform)
+                            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
+                            srout = None
+                            srin = None
+                            self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+                    counter += 2
+
+            else:
+                self.PreProcessLog.append(
+                    "Incorrect file structure. Please arrange files in a RAW, JPG, RAW, JGP... format.")
+            if self.PreProcessCameraModel.currentIndex() == 1 and customerdata:
+                if self.PreProcessCameraModel.currentIndex() == 1:
+                    os.chdir(outfolder)
+                    outfiles = []
+                    outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF]"))
+                    outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF][fF]"))
+                    counter = 0
+                    for input in outfiles:
+                        rgb = cv2.imread(input, -1)
+                        rgb = self.removeVignette(rgb, pixel_min_max)
+
+                        red = rgb[:, :, 2]
+                        green = rgb[:, :, 1]
+                        blue = rgb[:, :, 0]
+
+
+                        red[red > pixel_min_max["redmax"]] = pixel_min_max["redmax"]
+                        green[green > pixel_min_max["greenmax"]] = pixel_min_max["greenmax"]
+                        blue[blue > pixel_min_max["bluemax"]] = pixel_min_max["bluemax"]
+
+                        # maxval = max(max(pixel_min_max["redmax"], pixel_min_max["greenmax"]), pixel_min_max["bluemax"])
+                        # minval = min(min(pixel_min_max["redmin"], pixel_min_max["greenmin"]), pixel_min_max["bluemin"])
+
+                        red = (((red - pixel_min_max["redmin"]) / (pixel_min_max["redmax"] - pixel_min_max["redmin"])) * 65535)
+                        green = (((green - pixel_min_max["greenmin"]) / (pixel_min_max["greenmax"] - pixel_min_max["greenmin"])) * 65535)
+                        blue = (((blue - pixel_min_max["bluemin"]) / (pixel_min_max["bluemax"] - pixel_min_max["bluemin"])) * 65535)
+
+                        # red[green == 65535] = 65535
+                        # # red[blue == 65535] = 65535
+                        # # green[red == 65535] = 65535
+                        # # green[blue == 65535] = 65535
+                        # blue[green == 65535] = 65535
+                        # # blue[red == 65535] = 65535
+                        rgb = cv2.merge((blue, green, red))
+
+                        rgb = rgb.astype('uint16')
+
+                        filename = input.split('.')
+                        outputfilename = filename[1] + '.tiff'
+                        cv2.imencode(".tiff", rgb)
+
+                        cv2.imwrite(outfolder + outputfilename, rgb)
+                        if customerdata == True:
+                            srin = gdal.Open(input)
+                            inproj = srin.GetProjection()
+                            transform = srin.GetGeoTransform()
+                            gcpcount = srin.GetGCPs()
+                            srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
+                            srout.SetProjection(inproj)
+                            srout.SetGeoTransform(transform)
+                            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
+                            srout = None
+                            srin = None
+                            self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+                        counter += 2
+
+                else:
+                    self.PreProcessLog.append("Normalization for RGB camera models only")
+            elif customerdata:
+                os.chdir(outfolder)
+                outfiles = []
+                outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF]"))
+                outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF][fF]"))
+                counter = 0
+                for input in outfiles:
+                    photo = cv2.imread(input, -1)
+
+                    # blue = photo[:, :, 2]
+                    # green = photo[:, :, 1]
+                    # red = photo[:, :, 0]
+                    #
+                    #
+                    #
+                    #
+                    #
+                    # photo = cv2.merge((blue, green, red))
+
+                    outphoto = self.removeVignette(photo, pixel_min_max)
+
+
+
+                    filename = input.split('.')
+                    outputfilename = filename[1] + '.tiff'
+                    cv2.imencode(".tiff", outphoto)
+                    cv2.imwrite(outfolder + outputfilename, outphoto)
+                    if customerdata == True:
+                        srin = gdal.Open(input)
+                        inproj = srin.GetProjection()
+                        transform = srin.GetGeoTransform()
+                        gcpcount = srin.GetGCPs()
+                        srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
+                        srout.SetProjection(inproj)
+                        srout.SetGeoTransform(transform)
+                        srout.SetGCPs(gcpcount, srin.GetGCPProjection())
+                        srout = None
+                        srin = None
+                        self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+                    counter += 2
     def traverseHierarchy(self, tier, cont, index, image, depth, coords):
 
         if tier[0][index][2] != -1:
@@ -760,18 +1013,127 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                 y = int(moment['m01'] / moment['m00'])
                 coords.append([x, y])
             return
-    def openDNG(self, inphoto, outfolder):
+    def openDNG(self, inphoto, outfolder, customerdata=True):
         inphoto = str(inphoto)
-        newfile = inphoto.split(".")[0] + ".tiff" 
+        newfile = inphoto.split(".")[0] + ".tiff"
         if not os.path.exists(outfolder + os.sep + newfile.rsplit(os.sep, 1)[1]):
               if sys.platform == "win32":
-                    subprocess.call([modpath + os.sep + 'dcraw.exe', '-T', inphoto])
+                    subprocess.call([modpath + os.sep + 'dcraw.exe', '-6', '-T', inphoto])
               elif sys.platform == "darwin":
-                    subprocess.call([r'/usr/local/bin/dcraw', '-T', inphoto])
-              self.copyExif(os.path.abspath(inphoto), newfile)
+                    subprocess.call([r'/usr/local/bin/dcraw', '-6', '-T', inphoto])
+              if customerdata == True:
+                    self.copyExif(os.path.abspath(inphoto), newfile)
               shutil.move(newfile, outfolder)
         else:
               self.PreProcessLog.append("Attention!: " + str(newfile) + " already exists.")
+    def removeVignette(self, photo, pixel_min_max):
+        if self.PreProcessCameraModel.currentIndex() == 0:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'ndvi.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'ndvi.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 1:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'rgb.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'rgb.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 2:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'nir.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'nir.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 3:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'red.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'red.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 4:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'green.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'green.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 5:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'blue.tiff', 0)
+            dc = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'DC' + os.sep + 'Proc' + os.sep + 'blue.tiff', 0)
+        elif self.PreProcessCameraModel.currentIndex() == 7:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'FC350.tiff', 0)
+            dc = ff * 0
+        elif self.PreProcessCameraModel.currentIndex() == 8:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'FC330.tiff', 0)
+            dc = ff * 0
+        elif self.PreProcessCameraModel.currentIndex() == 9:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'FC300X.tiff', 0)
+            dc = ff * 0
+        elif self.PreProcessCameraModel.currentIndex() == 10:
+            ff = cv2.imread(modpath + os.sep + 'Vig' + os.sep + 'FF' + os.sep + 'Proc' + os.sep + 'FC300S.tiff', 0)
+            dc = ff * 0
+        else:
+            self.PreProcessLog.append(r'Vignette correction not yet available for selected camera model.')
+            return photo
+
+
+        ffblur = cv2.medianBlur(ff, 5)
+        dcblur = cv2.medianBlur(dc, 5)
+        ffblur = ffblur.max() / (ffblur)
+
+        # ffred = cv2.medianBlur(ff[:, :, 2].astype('uint8'),10)
+        # ffgreen = cv2.medianBlur(ff[:, :, 1].astype('uint8'),10)
+        # ffblue = cv2.medianBlur(ff[:, :, 0].astype('uint8'),10)
+        #
+        # ffred = np.max(ffred) / ffred
+        # ffgreen = np.max(ffgreen) / ffgreen
+        # ffblue = np.max(ffblue) / ffblue
+
+        # sred = ffred - dc[:, :, 2]
+        # sgreen = ffgreen - dc[:, :, 1]
+        # sblue = ffblue - dc[:, :, 0]
+        # height, width = ffred.shape
+        # mred = np.mean(cv2.circle(ffred, [height/2, width/2], 10))
+        # mgreen = np.mean(cv2.circle(ffgreen, [height / 2, width / 2], 10))
+        # mblue = np.mean(cv2.circle(ffblue, [height / 2, width / 2], 10))
+
+
+
+        red = photo[:, :, 2]
+        green = photo[:, :, 1]
+        blue = photo[:, :, 0]
+
+        red = (red - dcblur) * (ffblur)
+        green = (green - dcblur) * (ffblur)
+        blue = (blue - dcblur) * (ffblur)
+
+        # red = (red) * Gred
+        # green = (green) * Ggreen
+        # blue = (blue) * Gblue
+
+        # red[red < 0] = 0
+        # red[red > 65535] = 65535
+        # green[green < 0] = 0
+        # green[green > 65535] = 65535
+        # blue[blue < 0] = 0
+        # blue[blue > 65535] = 65535
+
+        # photo = cv2.merge((blue, green, red))
+        # photo = photo.astype('uint16')
+
+        # maxval = max(max(pixel_min_max["redmax"], pixel_min_max["greenmax"]), pixel_min_max["bluemax"])
+        # minval = min(min(pixel_min_max["redmin"], pixel_min_max["greenmin"]), pixel_min_max["bluemin"])
+
+        # red[red > pixel_min_max["redmax"]] = pixel_min_max["redmax"]
+        # green[green > pixel_min_max["greenmax"]] = pixel_min_max["greenmax"]
+        # blue[blue > pixel_min_max["bluemax"]] = pixel_min_max["bluemax"]
+
+
+        # red = (((red - minval) / (maxval - minval)) * 65535)
+        # green = (((green - minval) / (maxval - minval)) * 65535)
+        # blue = (((blue - minval) / (maxval - minval)) * 65535)
+
+        # red[red > np.percentile(red, 80)] = np.percentile(red, 80)
+        # green[green > np.percentile(green, 80)] = np.percentile(green, 80)
+        # blue[blue > np.percentile(blue, 80)] = np.percentile(blue, 80)
+
+        # photo[:, :, 0][photo[:, :, 1] == 65535] = 65535
+        # photo[:, :, 0][photo[:, :, 2] == 65535] = 65535
+        # photo[:, :, 1][photo[:, :, 0] == 65535] = 65535
+        # photo[:, :, 1][photo[:, :, 2] == 65535] = 65535
+        # photo[:, :, 2][photo[:, :, 0] == 65535] = 65535
+        # photo[:, :, 2][photo[:, :, 2] == 65535] = 65535
+        photo = cv2.merge((blue, green, red))
+        photo = photo.astype('uint16')
+        #
+        # photo = cv2.merge((photo[:, :, 0], photo[:, :, 1], photo[:, :, 2]))
+
+        return photo
 
     def copyExif(self, inphoto, outphoto):
         if sys.platform == "win32":

@@ -35,7 +35,7 @@ from PyQt4.QtGui import *
 from scipy import stats
 import numpy as np
 import subprocess
-import hid
+
 
 modpath = os.path.dirname(os.path.realpath(__file__))
 
@@ -144,7 +144,7 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.setupUi(self)
 
 
-   
+
     #########Pre-Process Steps: Start#################
     def on_PreProcessInButton_released(self):
         with open(modpath + os.sep + "instring.txt", "r+") as instring:

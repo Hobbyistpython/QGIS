@@ -3,8 +3,18 @@ This directory contains the download link to a pre-packeged version of the plugi
 Windows Users: Please run QGIS as the administrator the first time you install our plugin. The next times you do not need to run as administrator.
 
 
-## Latest Version 1.0.3
-####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12192016.zip)
+## Latest Version 1.0.4
+####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
+
+### [1.0.4] - 2017-01-31
+#### Added
+-Vignette correction
+
+#### Changed
+-Vignette correction and normalization are now always performed
+
+#### Fixed
+-Plugin now transfers projection data in preprocess and calibrate steps
 
 ### [1.0.3] - 2016-12-19
 #### Added
@@ -54,6 +64,8 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 - Issue with merging channels in DJIx3 images
 
 ##Previous Versions
+
+####[Version 1.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12192016.zip)
 
 ####[Version 1.0.2](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12152016.zip)
 

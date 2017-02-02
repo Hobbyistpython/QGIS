@@ -42,6 +42,16 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
+### [1.0.4] - 2017-01-31
+#### Added
+-Vignette correction
+
+#### Changed
+-Vignette correction and normalization are now always performed
+
+#### Fixed
+-Plugin now transfers projection data in preprocess and calibrate steps
+
 ### [1.0.3] - 2016-12-19
 #### Added
 - Normalization of RGB images in the Preprocess step.

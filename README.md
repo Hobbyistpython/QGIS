@@ -42,6 +42,11 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
+### [1.0.5] - 2017-02-07
+#### Fixed
+-EXIF information now properly copied, including geotagging information
+-Program no longer tries to read GDAL projections from images ohter than GeoTIFFs
+
 ### [1.0.4] - 2017-01-31
 #### Added
 -Vignette correction

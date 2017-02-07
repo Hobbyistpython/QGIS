@@ -9,7 +9,7 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 ### [1.0.5] - 2017-02-07
 #### Fixed
 -EXIF information now properly copied, including geotagging information
--Program no longer tries to read GDAL projections from images ohter than GeoTIFFs
+-Program no longer tries to read GDAL projections from images other than GeoTIFFs
 
 ### [1.0.4] - 2017-01-31
 #### Added

@@ -4,7 +4,12 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 
 
 ## Latest Version 1.0.4
-####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
+####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
+
+### [1.0.5] - 2017-02-07
+#### Fixed
+-EXIF information now properly copied, including geotagging information
+-Program no longer tries to read GDAL projections from images ohter than GeoTIFFs
 
 ### [1.0.4] - 2017-01-31
 #### Added
@@ -64,6 +69,8 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 - Issue with merging channels in DJIx3 images
 
 ##Previous Versions
+
+####[Version 1.0.4](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
 
 ####[Version 1.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12192016.zip)
 

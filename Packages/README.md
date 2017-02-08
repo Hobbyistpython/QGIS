@@ -3,7 +3,7 @@ This directory contains the download link to a pre-packeged version of the plugi
 Windows Users: Please run QGIS as the administrator the first time you install our plugin. The next times you do not need to run as administrator.
 
 
-## Latest Version 1.0.4
+## Latest Version 1.0.5
 ####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
 
 ### [1.0.5] - 2017-02-07

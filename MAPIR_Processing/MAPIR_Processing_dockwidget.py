@@ -853,9 +853,10 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
             if ("RAW" in infiles[0].upper()) and ("JPG" in infiles[1].upper()):
                 counter = 0
                 for input in infiles[::2]:
-                    self.PreProcessLog.append(
-                        "processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
-                        " " + input.split(os.sep)[1])
+                    if customerdata == True:
+                        self.PreProcessLog.append(
+                            "processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
+                            " " + input.split(os.sep)[1])
                     with open(input, "rb") as rawimage:
                         img = np.fromfile(rawimage, np.dtype('u2'), self.imsize).reshape((self.imrows, self.imcols))
                         color = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2RGB)
@@ -880,14 +881,13 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
 
                         if customerdata == True:
-
-                            self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+                            self.copyExif(infolder + infiles[counter + 1], outfolder + outputfilename)
                     counter += 2
 
             else:
                 self.PreProcessLog.append(
                     "Incorrect file structure. Please arrange files in a RAW, JPG, RAW, JGP... format.")
-            if self.PreProcessCameraModel.currentIndex() == 1 and customerdata:
+            if self.PreProcessCameraModel.currentIndex() == 1 and self.RgbBox.checkState() > 0 and customerdata:
                 if self.PreProcessCameraModel.currentIndex() == 1:
                     os.chdir(outfolder)
                     outfiles = []
@@ -896,7 +896,8 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                     counter = 0
                     for input in outfiles:
                         rgb = cv2.imread(input, -1)
-                        rgb = self.removeVignette(rgb, pixel_min_max)
+                        if self.VignetteBox.checkState() > 0:
+                            rgb = self.removeVignette(rgb, pixel_min_max)
 
                         red = rgb[:, :, 2]
                         green = rgb[:, :, 1]
@@ -930,12 +931,13 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
                         cv2.imwrite(outfolder + outputfilename, rgb)
                         if customerdata == True:
+
                             self.copyExif(infolder + infiles[counter + 1], outfolder + outputfilename)
                         counter += 2
 
-                else:
-                    self.PreProcessLog.append("Normalization for RGB camera models only")
-            elif customerdata:
+                # else:
+                #     self.PreProcessLog.append("Normalization for RGB camera models only")
+            elif self.VignetteBox.checkState() > 0 and customerdata:
                 os.chdir(outfolder)
                 outfiles = []
                 outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF]"))
@@ -963,7 +965,8 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                     cv2.imencode(".tiff", outphoto)
                     cv2.imwrite(outfolder + outputfilename, outphoto)
                     if customerdata == True:
-                        self.copyExif(infolder + infiles[counter + 1], outfolder + outputfilename)
+
+                        self.copyExif( infolder + infiles[counter + 1], outfolder + outputfilename)
                     counter += 2
     def traverseHierarchy(self, tier, cont, index, image, depth, coords):
 

@@ -3,8 +3,12 @@ This directory contains the download link to a pre-packeged version of the plugi
 Windows Users: Please run QGIS as the administrator the first time you install our plugin. The next times you do not need to run as administrator.
 
 
-## Latest Version 1.0.5
-####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
+## Latest Version 1.0.6
+####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)
+
+### [1.0.6] - 2017-02-10
+#### Changed
+-Plugin now allows for users to trun vignette correction on/off
 
 ### [1.0.5] - 2017-02-07
 #### Fixed
@@ -69,6 +73,8 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 - Issue with merging channels in DJIx3 images
 
 ##Previous Versions
+
+####[Version 1.0.5](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
 
 ####[Version 1.0.4](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
 

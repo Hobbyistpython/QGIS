@@ -42,6 +42,10 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
+### [1.0.6] - 2017-02-10
+#### Changed
+-Plugin now allows for users to trun vignette correction on/off
+
 ### [1.0.5] - 2017-02-07
 #### Fixed
 -EXIF information now properly copied, including geotagging information

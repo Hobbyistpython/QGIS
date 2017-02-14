@@ -2,6 +2,7 @@ This directory contains the download link to a pre-packeged version of the plugi
 
 Windows Users: Please run QGIS as the administrator the first time you install our plugin. The next times you do not need to run as administrator.
 
+##Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
 
 ## Latest Version 1.0.6
 ####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)

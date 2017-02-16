@@ -21,6 +21,8 @@ Functionality still in the works:
 - In the top Plugin menu bar, choose the MAPIR plugin.
 
 ![](qgis_folder.PNG)
+![](qgis_folder2.PNG)
+![](qgis_plugin.PNG)
 
 ##Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
 

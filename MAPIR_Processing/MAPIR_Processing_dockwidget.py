@@ -36,6 +36,7 @@ from scipy import stats
 import numpy as np
 import subprocess
 import hid
+import struct
 
 modpath = os.path.dirname(os.path.realpath(__file__))
 
@@ -58,7 +59,7 @@ if sys.platform == "win32": #Windows OS
 
 elif sys.platform == "darwin":
       if not os.path.exists(r'/usr/local/bin/brew'):
-            subprocess.call([r'/usr/bin/ruby', r'-e', r'"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'])
+            subprocess.call([r'/usr/bin/ruby', r'-e', r'"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"', r'<', r'/dev/null'])
             subprocess.call([r'/usr/local/bin/brew',r'tap',r'homebrew/science'])
       if not os.path.exists(r'/usr/local/bin/dcraw'):
             subprocess.call([r'/usr/local/bin/brew',r'install',r'dcraw'])
@@ -76,10 +77,11 @@ elif sys.platform == "darwin":
 from osgeo import gdal
 import cv2
 import glob
-
-if os.name == "nt":
-      import exiftool
-      exiftool.executable = modpath + os.sep + "exiftool.exe"
+si = subprocess.STARTUPINFO()
+si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+# if sys.platform == "win32":
+#       import exiftool
+#       exiftool.executable = modpath + os.sep + "exiftool.exe"
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'MAPIR_Processing_dockwidget_base.ui'))
 MODAL_CLASS, _ = uic.loadUiType(os.path.join(
@@ -143,7 +145,7 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
     BASE_COEFF_SURVEY2_RED_TIF = [-5.09645820, 0.24177528, 0.0, 0.0, 0.0, 0.0]
     BASE_COEFF_SURVEY2_GREEN_TIF = [0.0, 0.0, -1.39528479, 0.07640011, 0.0, 0.0]
     BASE_COEFF_SURVEY2_BLUE_TIF = [0.0, 0.0, 0.0, 0.0, -0.67299134, 0.03943339]
-    BASE_COEFF_SURVEY2_NDVI_TIF = [-0.60138990, 0.14454211, 0.0, 0.0, -3.51691589, 0.21536524]
+    BASE_COEFF_SURVEY2_NDVI_TIF = [3.21946584661, 1.06087488594, 0.0, 0.0, -43.6505776052, 1.46482226805]
     BASE_COEFF_SURVEY2_NIR_TIF = [-2.24216724, 0.12962333, 0.0, 0.0, 0.0, 0.0 ]
     BASE_COEFF_DJIX3_NDVI_JPG = [-0.34430543, 4.63184993, 0.0, 0.0, -0.49413940, 16.36429964]
     BASE_COEFF_DJIX3_NDVI_TIF = [-0.74925346, 0.01350319, 0.0, 0.0, -0.77810008, 0.03478272]
@@ -193,6 +195,12 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+
+
+
+
+
 
 
     def on_KernelExposureMode_currentIndexChanged(self, int):
@@ -522,7 +530,16 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                 for calpixel in files_to_calibrate:
 
                     img = cv2.imread(calpixel, -1)
-
+                    # imsize = np.shape(img)
+                    # if imsize[0] > self.imcols or imsize[1] > self.imrows:
+                    #     if "tif" or "TIF" in calpixel:
+                    #         tempimg = np.memmap(calpixel, dtype=np.uint16, shape=(imsize))
+                    #         refimg = None
+                    #         refimg = tempimg
+                    #     else:
+                    #         tempimg = np.memmap(calpixel, dtype=np.uint8, shape=(imsize))
+                    #         refimg = None
+                    #         refimg = tempimg
 
                     if self.CalibrationCameraModel.currentIndex() == 5: #Survey1_NDVI
                         # img = img.astype('float')
@@ -705,12 +722,24 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def CalibratePhotos(self, photo, coeffs, minmaxes, output_directory):
         refimg = cv2.imread(photo, -1)
+        # imsize = np.shape(refimg)
+        # if imsize[0] > self.imcols or imsize[1] > self.imrows:
+        #     if "tif" or "TIF" in photo:
+        #             tempimg = np.memmap(photo, dtype=np.uint16, shape=(imsize))
+        #             refimg = None
+        #             refimg = tempimg
+        #     else:
+        #             tempimg = np.memmap(photo, dtype=np.uint8, shape=(imsize))
+        #             refimg = None
+        #             refimg = tempimg
 
         ### split channels (using cv2.split caused too much overhead and made the host program crash)
         blue = refimg[:, :, 0]
         green = refimg[:, :, 1]
         red = refimg[:, :, 2]
-
+        if refimg.shape[2] > 3:
+            alpha = refimg[:, :, 3]
+            refimg = refimg[:,:,:3]
 
         ### find the maximum and minimum pixel values over the entire directory.
         if self.CalibrationCameraModel.currentIndex() == 5: ###Survey1 NDVI
@@ -765,7 +794,13 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     ### Merge the channels back into a single image
         refimg = cv2.merge((blue, green, red))
-
+        if refimg.shape[2] > 3:
+            white_background_image = np.ones_like(refimg, dtype=np.uint8) * 255
+            a_factor = alpha[:,:,np.newaxis].astype(np.float32) / 255.0
+            a_factor = np.concatenate((a_factor, a_factor, a_factor), axis=2)
+            base = refimg.astype(np.float32) * a_factor
+            white = white_background_image.astype(np.float32) * (1 - a_factor)
+            refimg = base + white
     ### If the image is a .tiff then change it to a 16 bit color image
         if "TIF" in photo.split('.')[2].upper() and not self.Tiff2JpgBox.checkState() > 0:
             refimg = refimg.astype("uint16")
@@ -797,15 +832,8 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.CalibrationLog.append("Making JPG")
             cv2.imencode(".jpg", refimg)
             cv2.imwrite(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", refimg, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-            cv2.imwrite(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", refimg)
-            srin = gdal.Open(photo)
-            inproj = srin.GetProjection()
-            transform = srin.GetGeoTransform()
-            gcpcount = srin.GetGCPs()
-            srout = gdal.Open(output_directory + photo.split('.')[1] + "_CALIBRATED.JPG", gdal.GA_Update)
-            srout.SetProjection(inproj)
-            srout.SetGeoTransform(transform)
-            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
+
+
             self.copyExif(photo, output_directory + photo.split('.')[1] + "_CALIBRATED.JPG")
             # if self.IndexBox.checkState() > 0:
             #     indeximg = (blue - red) / (blue + red)
@@ -815,18 +843,21 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
             #todo See if JPG can store geotiff metadata
         else:
             newimg = output_directory + photo.split('.')[1] + "_CALIBRATED." + photo.split('.')[2]
-            cv2.imencode(".tiff", refimg)
-            cv2.imwrite(newimg, refimg)
-            srin = gdal.Open(photo)
-            inproj = srin.GetProjection()
-            transform = srin.GetGeoTransform()
-            gcpcount = srin.GetGCPs()
-            srout = gdal.Open(newimg, gdal.GA_Update)
-            srout.SetProjection(inproj)
-            srout.SetGeoTransform(transform)
-            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
-            srout = None
-            srin = None
+            if 'tif' in photo.split('.')[2].lower():
+                cv2.imencode(".tiff", refimg)
+                cv2.imwrite(newimg, refimg)
+                srin = gdal.Open(photo)
+                inproj = srin.GetProjection()
+                transform = srin.GetGeoTransform()
+                gcpcount = srin.GetGCPs()
+                srout = gdal.Open(newimg, gdal.GA_Update)
+                srout.SetProjection(inproj)
+                srout.SetGeoTransform(transform)
+                srout.SetGCPs(gcpcount, srin.GetGCPProjection())
+                srout = None
+                srin = None
+            else:
+                cv2.imwrite(newimg, refimg, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             self.copyExif(photo, newimg)
             # if self.IndexBox.checkState() > 0:
             #     indeximg = (blue - red) / (blue + red)
@@ -1012,7 +1043,12 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
 
 
-
+        # self.CalibrationLog.append("Red Slope: " + str(redslope))
+        # self.CalibrationLog.append("Red Intcpt: " + str(redintcpt))
+        # self.CalibrationLog.append("Green Slope: " + str(greenslope))
+        # self.CalibrationLog.append("Green Intcpt: " + str(greenintcpt))
+        # self.CalibrationLog.append("Blue Slope: " + str(blueslope))
+        # self.CalibrationLog.append("Blue Intcpt: " + str(blueintcpt))
         self.CalibrationLog.append("Found QR Target, please proceed with calibration.")
 
 
@@ -1041,6 +1077,20 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                 self.openDNG(infolder + input.split('.')[1] + "." + input.split('.')[2], outfolder, customerdata)
 
                 counter += 1
+        elif 'Kernel' in self.PreProcessCameraModel.currentText():
+            os.chdir(infolder)
+            infiles = []
+            infiles.extend(glob.glob("." + os.sep + "*.[mM][aA][pP][iI][rR]"))
+            counter = 0
+            for input in infiles:
+                self.PreProcessLog.append(
+                    "processing image: " + str((counter) + 1) + " of " + str(len(infiles)) +
+                    " " + input.split(os.sep)[1])
+                filename = input.split('.')
+                outputfilename = filename[1] + '.tiff'
+                self.openMapir(infolder + input.split('.')[1] + "." + input.split('.')[2], outfolder + outputfilename)
+
+                counter += 1
         else:
             os.chdir(infolder)
             infiles = []
@@ -1052,9 +1102,10 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
             if ("RAW" in infiles[0].upper()) and ("JPG" in infiles[1].upper()):
                 counter = 0
                 for input in infiles[::2]:
-                    self.PreProcessLog.append(
-                        "processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
-                        " " + input.split(os.sep)[1])
+                    if customerdata == True:
+                        self.PreProcessLog.append(
+                            "processing image: " + str((counter / 2) + 1) + " of " + str(len(infiles) / 2) +
+                            " " + input.split(os.sep)[1])
                     with open(input, "rb") as rawimage:
                         img = np.fromfile(rawimage, np.dtype('u2'), self.imsize).reshape((self.imrows, self.imcols))
                         color = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2RGB)
@@ -1079,23 +1130,13 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
 
                         if customerdata == True:
-                            srin = gdal.Open(infiles[counter + 1])
-                            inproj = srin.GetProjection()
-                            transform = srin.GetGeoTransform()
-                            gcpcount = srin.GetGCPs()
-                            srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
-                            srout.SetProjection(inproj)
-                            srout.SetGeoTransform(transform)
-                            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
-                            srout = None
-                            srin = None
-                            self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+                            self.copyExif(infolder + infiles[counter + 1], outfolder + outputfilename)
                     counter += 2
 
             else:
                 self.PreProcessLog.append(
                     "Incorrect file structure. Please arrange files in a RAW, JPG, RAW, JGP... format.")
-            if self.PreProcessCameraModel.currentIndex() == 1 and customerdata:
+            if self.PreProcessCameraModel.currentIndex() == 1 and self.RgbBox.checkState() > 0 and customerdata:
                 if self.PreProcessCameraModel.currentIndex() == 1:
                     os.chdir(outfolder)
                     outfiles = []
@@ -1104,7 +1145,8 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                     counter = 0
                     for input in outfiles:
                         rgb = cv2.imread(input, -1)
-                        rgb = self.removeVignette(rgb, pixel_min_max)
+                        if self.VignetteBox.checkState() > 0:
+                            rgb = self.removeVignette(rgb, pixel_min_max)
 
                         red = rgb[:, :, 2]
                         green = rgb[:, :, 1]
@@ -1138,22 +1180,13 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
                         cv2.imwrite(outfolder + outputfilename, rgb)
                         if customerdata == True:
-                            srin = gdal.Open(input)
-                            inproj = srin.GetProjection()
-                            transform = srin.GetGeoTransform()
-                            gcpcount = srin.GetGCPs()
-                            srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
-                            srout.SetProjection(inproj)
-                            srout.SetGeoTransform(transform)
-                            srout.SetGCPs(gcpcount, srin.GetGCPProjection())
-                            srout = None
-                            srin = None
-                            self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+
+                            self.copyExif(infolder + infiles[counter + 1], outfolder + outputfilename)
                         counter += 2
 
-                else:
-                    self.PreProcessLog.append("Normalization for RGB camera models only")
-            elif customerdata:
+                # else:
+                #     self.PreProcessLog.append("Normalization for RGB camera models only")
+            elif self.VignetteBox.checkState() > 0 and customerdata:
                 os.chdir(outfolder)
                 outfiles = []
                 outfiles.extend(glob.glob("." + os.sep + "*.[tT][iI][fF]"))
@@ -1181,17 +1214,8 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
                     cv2.imencode(".tiff", outphoto)
                     cv2.imwrite(outfolder + outputfilename, outphoto)
                     if customerdata == True:
-                        srin = gdal.Open(input)
-                        inproj = srin.GetProjection()
-                        transform = srin.GetGeoTransform()
-                        gcpcount = srin.GetGCPs()
-                        srout = gdal.Open(outfolder + outputfilename, gdal.GA_Update)
-                        srout.SetProjection(inproj)
-                        srout.SetGeoTransform(transform)
-                        srout.SetGCPs(gcpcount, srin.GetGCPProjection())
-                        srout = None
-                        srin = None
-                        self.copyExif(infiles[counter + 1], outfolder + outputfilename)
+
+                        self.copyExif( infolder + infiles[counter + 1], outfolder + outputfilename)
                     counter += 2
     def traverseHierarchy(self, tier, cont, index, image, depth, coords):
 
@@ -1323,18 +1347,30 @@ class MAPIR_ProcessingDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # photo[:, :, 2][photo[:, :, 2] == 65535] = 65535
         photo = cv2.merge((blue, green, red))
         photo = photo.astype('uint16')
-        #
+        #a
         # photo = cv2.merge((photo[:, :, 0], photo[:, :, 1], photo[:, :, 2]))
 
         return photo
 
+    def openMapir(self, inphoto, outphoto):
+        subprocess.call(
+            [modpath + os.sep + r'"Mapir Converter.exe"', os.path.abspath(inphoto),
+             os.path.abspath(outphoto)])
+
     def copyExif(self, inphoto, outphoto):
         if sys.platform == "win32":
-              with exiftool.ExifTool() as et:
-                  et.execute('-overwrite_original -tagsFromFile ' + inphoto + ' ' + outphoto)
+              # with exiftool.ExifTool() as et:
+              #     et.execute(r' -overwrite_original -tagsFromFile ' + os.path.abspath(inphoto) + ' ' + os.path.abspath(outphoto))
+
+              subprocess.call(
+                  [modpath + os.sep + r'exiftool.exe', r'-overwrite_original', r'-addTagsFromFile',
+                   os.path.abspath(inphoto),
+                   r'-all:all<all:all',
+                   os.path.abspath(outphoto)], startupinfo=si)
         elif sys.platform == "darwin":
-              subprocess.call([r'/usr/local/bin/exiftool', r'-overwrite_original', r'-tagsFromFile', os.path.abspath(inphoto), os.path.abspath(outphoto)])
- 
+              subprocess.call([r'/usr/local/bin/exiftool', r'-overwrite_original', r'-addTagsFromFile', os.path.abspath(inphoto), r'-all:all<all:all',
+                   os.path.abspath(outphoto)])
+
     def closeEvent(self, event):
         self.closingPlugin.emit()
         event.accept()

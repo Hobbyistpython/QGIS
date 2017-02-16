@@ -16,7 +16,7 @@ Functionality still in the works:
 
 ### Installation
 - Download and install QGIS program [HERE](http://www.qgis.org/en/site/forusers/download.html)
-- Download the [MAPIR_Processing folder](https://github.com/mapircamera/QGIS/tree/master/Packages), unzip it and add it to your .qgis2/python/plugins folder. In Windows, the .qgis2 folder is in C:\Users\<your computer user name>.
+- Download the [MAPIR_Processing folder](https://github.com/mapircamera/QGIS/tree/master/Packages), unzip it and add it to your .qgis2/python/plugins folder. In Windows, the .qgis2 folder is in C:\Users\(your computer user name).
 - Start QGIS as an administrator (right mouse click, run as admin).
 - In the top Plugin menu bar, choose the MAPIR plugin.
 

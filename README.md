@@ -20,7 +20,7 @@ Functionality still in the works:
 - Start QGIS as an administrator (right mouse click, run as admin).
 - In the top Plugin menu bar, choose the MAPIR plugin.
 
-![](/qgis_folder.png)
+![](qgis_folder.PNG)
 
 ##Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
 

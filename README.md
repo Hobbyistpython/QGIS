@@ -50,6 +50,11 @@ Functionality still in the works:
 ## Change Log
 All notable changes to this project will be documented in this file.
 
+### [1.0.6] - 2017-03-02
+#### Changed
+-Removed the Vignette correction and color normalization due to a critical flaw in the design. 
+-Modified the UI to support lens and filter options for future use.
+
 ### [1.0.6] - 2017-02-10
 #### Changed
 -Plugin now allows for users to trun vignette correction on/off

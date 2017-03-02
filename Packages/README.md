@@ -4,8 +4,13 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 
 ##Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
 
-## Latest Version 1.0.6
-####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)
+## Latest Version 1.0.7
+####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_03022017.zip)
+
+### [1.0.7] - 2017-03-02
+#### Changed
+-Removed the Vignette correction and color normalization due to a critical flaw in the design. 
+-Modified the UI to support lens and filter options for future use.
 
 ### [1.0.6] - 2017-02-10
 #### Changed
@@ -74,6 +79,8 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 - Issue with merging channels in DJIx3 images
 
 ##Previous Versions
+
+####[Version 1.0.6](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)
 
 ####[Version 1.0.5](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
 

@@ -26,10 +26,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="MAPIR_Processing_dockwidget.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/MAPIR_Processing_dockwidget.py">
+        <entry file="file://$USER_HOME$/.qgis2/python/plugins/MAPIR_Processing/MAPIR_Processing_dockwidget.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="59" column="0" selection-start-line="59" selection-start-column="0" selection-end-line="74" selection-end-column="47" />
+            <state relative-caret-position="-630">
+              <caret line="1180" column="30" selection-start-line="1180" selection-start-column="30" selection-end-line="1180" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -41,9 +41,9 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/MAPIR_Processing.py" />
-        <option value="$USER_HOME$/Desktop/MAPIR/QGIS/MAPIR_Processing/MAPIR_Processing.py" />
-        <option value="$USER_HOME$/Desktop/MAPIR_Processing/MAPIR_Processing_dockwidget.py" />
-        <option value="$USER_HOME$/Desktop/MAPIR/QGIS/MAPIR_Processing/MAPIR_Processing_dockwidget.py" />
+        <option value="$PROJECT_DIR$/MAPIR_Processing.py" />
+        <option value="$PROJECT_DIR$/../../../MAPIR_Processing/MAPIR_Processing_dockwidget.py" />
+        <option value="$PROJECT_DIR$/MAPIR_Processing_dockwidget.py" />
         <option value="$PROJECT_DIR$/MAPIR_Processing_dockwidget.py" />
       </list>
     </option>
@@ -85,6 +85,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -123,7 +124,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
@@ -406,17 +406,17 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1748401" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.034669556" sideWeight="0.50208336" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18123667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.4978678" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5021322" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -481,7 +481,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -494,7 +493,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -510,7 +508,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -526,7 +523,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -542,7 +538,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3587">
           <caret line="218" column="42" selection-start-line="218" selection-start-column="42" selection-end-line="218" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -565,7 +560,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -576,7 +570,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -585,7 +578,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -594,7 +586,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -603,13 +594,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/MAPIR_Processing.py" />
     <entry file="file://$PROJECT_DIR$/MAPIR_Processing.py" />
-    <entry file="file://$USER_HOME$/Desktop/PyExiftool/smarnach-pyexiftool-v0.2.0-0-g3db3764/smarnach-pyexiftool-3db3764/exiftool.py" />
+    <entry file="file://$PROJECT_DIR$/../../../PyExiftool/smarnach-pyexiftool-v0.2.0-0-g3db3764/smarnach-pyexiftool-3db3764/exiftool.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="782">
@@ -624,13 +614,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/MAPIR/QGIS/MAPIR_Processing/MAPIR_Processing.py" />
+    <entry file="file://$PROJECT_DIR$/MAPIR_Processing.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Temp/Temp1_MAPIR_Processing_12022016.zip/MAPIR_Processing/MAPIR_Processing_dockwidget.py" />
     <entry file="file://$PROJECT_DIR$/plugin_upload.py" />
     <entry file="file://$PROJECT_DIR$/resources.py" />
     <entry file="file://$PROJECT_DIR$/resouces_rc.py" />
     <entry file="file://$PROJECT_DIR$/__init__.py" />
-    <entry file="file://$USER_HOME$/Desktop/MAPIR_Processing/MAPIR_Processing_dockwidget.py">
+    <entry file="file://$PROJECT_DIR$/../../../MAPIR_Processing/MAPIR_Processing_dockwidget.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="914">
           <caret line="320" column="22" selection-start-line="197" selection-start-column="3" selection-end-line="339" selection-end-column="36" />
@@ -638,19 +628,11 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/MAPIR_Processing.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/Temp1_MAPIR_Processing_01312017.zip/MAPIR_Processing_dockwidget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-969">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/MAPIR/QGIS/MAPIR_Processing/MAPIR_Processing_dockwidget.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Temp1_MAPIR_Processing_01312017.zip/MAPIR_Processing_dockwidget.py" />
+    <entry file="file://$PROJECT_DIR$/MAPIR_Processing_dockwidget.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
           <caret line="221" column="68" selection-start-line="221" selection-start-column="68" selection-end-line="221" selection-end-column="68" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -658,7 +640,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
           <caret line="59" column="0" selection-start-line="59" selection-start-column="0" selection-end-line="74" selection-end-column="47" />
-          <folding />
         </state>
       </provider>
     </entry>

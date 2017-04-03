@@ -2,10 +2,15 @@ This directory contains the download link to a pre-packeged version of the plugi
 
 Windows Users: Please run QGIS as the administrator the first time you install our plugin. The next times you do not need to run as administrator.
 
-##Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
+## Attention: We've found a fatal flaw in trying to run the plugin on MacOS, Mac support will be discontinued until further notice
 
-## Latest Version 1.0.8
-####[QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_03072017.zip)
+## Latest Version 1.0.9
+#### [QGIS package](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_04032017.zip)
+
+### [1.0.9] - 2017-04-03
+#### Fixed
+-Issue locating QR taget when supplied with a JPG.
+-Issue processing images from Survey1 camera.
 
 ### [1.0.8] - 2017-03-07
 #### Fixed
@@ -82,26 +87,28 @@ Windows Users: Please run QGIS as the administrator the first time you install o
 #### FIXED
 - Issue with merging channels in DJIx3 images
 
-##Previous Versions
+## Previous Versions
 
-####[Version 1.0.7](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_03022017.zip)
+#### [Version 1.0.8](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_03072017.zip)
 
-####[Version 1.0.6](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)
+#### [Version 1.0.7](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_03022017.zip)
 
-####[Version 1.0.5](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
+#### [Version 1.0.6](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02102017.zip)
 
-####[Version 1.0.4](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
+#### [Version 1.0.5](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_02072017.zip)
 
-####[Version 1.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12192016.zip)
+#### [Version 1.0.4](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_01312017.zip)
 
-####[Version 1.0.2](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12152016.zip)
+#### [Version 1.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12192016.zip)
 
-####[Version 1.0.1](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12142016.zip)
+#### [Version 1.0.2](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12152016.zip)
 
-####[Version 1.0.0](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12132016.zip)
+#### [Version 1.0.1](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12142016.zip)
 
-####[Version 0.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12062016.zip)
+#### [Version 1.0.0](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12132016.zip)
 
-####[Version 0.0.2](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12022016.zip)
+#### [Version 0.0.3](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12062016.zip)
 
-####[Version 0.0.1](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12012016.zip)
+#### [Version 0.0.2](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12022016.zip)
+
+#### [Version 0.0.1](http://www.docs.peauproductions.com/qgis/MAPIR_Processing_12012016.zip)
